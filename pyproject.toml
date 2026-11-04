@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-agent-learn"
+version = "0.1.0"
+description = "Python Agent 学习路径，按阶段逐步深入"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+langchain = [
+    "langchain>=0.2",
+    "langchain-openai>=0.1",
+    "langgraph>=0.1",
+]
+fastapi = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+]
+rag = [
+    "chromadb>=0.4",
+    "faiss-cpu>=1.8",
+]
+
+[tool.setuptools]
+packages = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
