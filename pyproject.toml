@@ -9,6 +9,7 @@ description = "Python Agent 学习路径，按阶段逐步深入"
 requires-python = ">=3.10"
 dependencies = [
     "python-dotenv>=1.0",
+    "openai>=1.30",
 ]
 
 [project.optional-dependencies]
