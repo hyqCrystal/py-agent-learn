@@ -27,7 +27,7 @@ env/
 ENV/
 
 # 环境变量
-.env
+phase02-framework/mini-agent/.env
 .env.local
 
 # IDE
