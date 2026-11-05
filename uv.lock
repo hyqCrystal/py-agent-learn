@@ -2950,6 +2950,7 @@ source = { editable = "." }
 dependencies = [
     { name = "langchain" },
     { name = "openai" },
+    { name = "pydantic" },
     { name = "python-dotenv" },
 ]
 
@@ -2978,6 +2979,7 @@ requires-dist = [
     { name = "langchain-openai", marker = "extra == 'langchain'", specifier = ">=0.1" },
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.1" },
     { name = "openai", specifier = ">=1.30" },
+    { name = "pydantic", specifier = ">=2.14.2" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "uvicorn", marker = "extra == 'fastapi'", specifier = ">=0.29" },
 ]

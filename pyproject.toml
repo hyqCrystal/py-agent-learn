@@ -11,6 +11,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "openai>=1.30",
     "langchain>=1.4.8",
+    "pydantic>=2.14.2",
 ]
 
 [project.optional-dependencies]
