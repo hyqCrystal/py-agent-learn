@@ -16,17 +16,15 @@
 """
 
 import os
-import json
 from datetime import datetime
 
 from dotenv import load_dotenv, find_dotenv
-from openai import OpenAI
 from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
 from langchain_core.tools import StructuredTool
-from langchain_core.messages import HumanMessage, AIMessage
 
 # ============================================================
-# 1. 初始化配置（同 mini-agent）
+# 1. 初始化配置（用 langchain-openai 的 ChatOpenAI 替代原生 OpenAI 客户端）
 # ============================================================
 
 env_path = find_dotenv()
@@ -39,7 +37,8 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-6-terra")
 if not API_KEY or not BASE_URL:
     raise ValueError("缺少 OPENAI_API_KEY / OPENAI_BASE_URL，请检查 .env 文件")
 
-client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
+# LangChain 阶段统一用 langchain-openai，不再直接使用 openai 包
+llm = ChatOpenAI(model=MODEL, api_key=API_KEY, base_url=BASE_URL)
 
 
 # ============================================================
@@ -91,17 +90,8 @@ tools = [
     ),
 ]
 
-# 转成 OpenAI function calling 需要的 tools 格式
-tools_openai = []
-for t in tools:
-    tools_openai.append({
-        "type": "function",
-        "function": {
-            "name": t.name,
-            "description": t.description,
-            "parameters": t.args_schema.model_json_schema(),
-        },
-    })
+# 用 bind_tools 把工具绑定到模型（langchain-openai 会自动生成 function calling 的 schema）
+model_with_tools = llm.bind_tools(tools)
 
 
 # ============================================================
@@ -149,12 +139,8 @@ def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> s
     messages = memory.get_messages() + [{"role": "user", "content": question}]
 
     while True:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            tools=tools_openai,
-        )
-        msg = response.choices[0].message
+        # 用 langchain-openai 的 invoke 替代原生 client.chat.completions.create
+        msg = model_with_tools.invoke(messages)
         messages.append(msg)
 
         if not msg.tool_calls:
@@ -165,8 +151,9 @@ def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> s
             return msg.content
 
         for call in msg.tool_calls:
-            tool_name = call.function.name
-            args = json.loads(call.function.arguments)
+            tool_name = call["name"]
+            # langchain 的 tool_calls 里 args 已经是 dict，无需 json.loads
+            args = call["args"]
 
             callback.on_tool_start(tool_name, args)
 
@@ -181,7 +168,7 @@ def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> s
 
             messages.append({
                 "role": "tool",
-                "tool_call_id": call.id,
+                "tool_call_id": call["id"],
                 "content": result,
             })
 

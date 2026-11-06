@@ -1,11 +1,10 @@
 # 联系 草稿
-import json
 import os
 from datetime import datetime
 
 from dotenv import find_dotenv, load_dotenv
 from langchain_core.tools import StructuredTool
-from openai import OpenAI
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 env_path = find_dotenv()
@@ -16,7 +15,8 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = os.getenv("OPENAI_BASE_URL")
 MODEL = os.getenv("OPENAI_MODEL", "gpt-6-terra")
 
-client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
+# LangChain 阶段统一用 langchain-openai，不再直接使用 openai 包
+llm = ChatOpenAI(model=MODEL, api_key=API_KEY, base_url=BASE_URL)
 
 
 def get_weather(city:str)->str:
@@ -55,19 +55,8 @@ tools=[
     ),
 ]
 
-tools_openai = []
-
-for tool in tools:
-    tools_openai.append(
-        {
-            "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.args_schema.model_json_schema(),
-            },
-        }
-    )
+# 用 bind_tools 绑定工具（langchain-openai 自动生成 function calling schema）
+model_with_tools = llm.bind_tools(tools)
 
 class WindowMemory:
     def __init__(self, k: int = 8):
@@ -99,13 +88,8 @@ class AgentCallback:
 def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> None:
     messages = memory.get_messages() + [{"role": "user", "content": question}]
     while True:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            tools=tools_openai,
-            tool_choice="auto"
-        )
-        msg=response.choices[0].message
+        # 用 langchain-openai 的 invoke 替代原生 client.chat.completions.create
+        msg = model_with_tools.invoke(messages)
         messages.append(msg)
 
         if not msg.tool_calls:
@@ -115,8 +99,8 @@ def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> N
             return msg.content
 
         for call in msg.tool_calls:
-            tool_name = call.function.name
-            args = json.loads(call.function.arguments)
+            tool_name = call["name"]
+            args = call["args"]
 
             callback.on_tool_start(tool_name, args)
 
@@ -130,7 +114,7 @@ def run_agent(question: str, memory: WindowMemory, callback: AgentCallback) -> N
 
             messages.append({
                 "role": "tool",
-                "tool_call_id": call.id,
+                "tool_call_id": call["id"],
                 "content": tool_output,
             })
 

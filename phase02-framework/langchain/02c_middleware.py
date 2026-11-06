@@ -19,17 +19,35 @@
     uv run python 02c_middleware.py
 """
 
-from langchain.agents import create_agent  # 组装 agent 的入口（对齐笔记用法）
+import os
+
+from dotenv import load_dotenv, find_dotenv
+from langchain.agents import create_agent  # 组装 agent 的入口
 from langchain.agents.middleware import (
-    SummarizationMiddleware,   # 摘要（见注释用法，需真实 model）
+    SummarizationMiddleware,   # 摘要（需真实 model）
     ModelCallLimitMiddleware,  # 限流
     ToolRetryMiddleware,       # 重试
 )
 from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
 
-# 注：本项目用 openai.OpenAI 直连（见 02h_agent.py），不依赖 langchain-openai。
-#     限流 / 重试中间件无需 model，可直接实例化；
-#     SummarizationMiddleware 需真实 model（触发 init_chat_model），故以注释演示。
+# 注：LangChain 阶段统一使用 langchain-openai（ChatOpenAI），不再直接使用 openai 包。
+#     SummarizationMiddleware 需要真实 model 生成摘要；
+#     限流 / 重试中间件无需 model，可直接实例化。
+
+
+# ============================================================
+# 0. 初始化模型（读 .env，对齐 02h 风格）
+# ============================================================
+
+env_path = find_dotenv()
+load_dotenv(env_path)
+
+model = ChatOpenAI(
+    model=os.getenv("OPENAI_MODEL", "gpt-6-terra"),
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
+)
 
 
 # ============================================================
@@ -62,16 +80,14 @@ print("验证点①：SummarizationMiddleware（长上下文自动摘要）")
 print("=" * 60)
 
 # SummarizationMiddleware 需要一个 model 来生成摘要（第一个参数必填），
-# 实例化时会真正初始化 ChatOpenAI（需要 langchain-openai 包 + 真实 key）。
-# 本项目用 openai 直连、不装 langchain-openai，故这里以注释展示完整用法：
-#   summarizer = SummarizationMiddleware(
-#       model="gpt-4o-mini",       # 用哪个模型做摘要（也可传 ChatOpenAI 实例）
-#       trigger=("tokens", 8000),  # 上下文达到 8000 token 时触发
-#       keep=("messages", 20),     # 摘要后保留最近 20 条消息
-#   )
-#   agent = create_agent(model, tools, middleware=[summarizer])
-print("SummarizationMiddleware 用法见上方注释：长对话自动把早期消息压成摘要")
-print("（依赖 langchain-openai + 真实 key，故本脚本不实例化，仅展示）")
+# 用 langchain-openai 的 ChatOpenAI 实例（统一方案，不直接用 openai 包）：
+summarizer = SummarizationMiddleware(
+    model=model,                 # 用哪个模型做摘要（复用上方 .env 读到的 model）
+    trigger=("tokens", 8000),    # 上下文达到 8000 token 时触发
+    keep=("messages", 20),       # 摘要后保留最近 20 条消息
+)
+print(f"已声明 {summarizer.name}：长对话自动把早期消息压成摘要")
+print("（依赖 langchain-openai + 真实 key，故本脚本仅声明、不真正运行）")
 print()
 
 
@@ -120,9 +136,9 @@ print("=" * 60)
 # 真实组装：把中间件列表传给 create_agent 的 middleware 参数
 # （这里仅演示「怎么传」，不真正运行，因需要真实 model）
 #   agent = create_agent(model, tools, middleware=[
-#       SummarizationMiddleware(model="gpt-4o-mini"),   # 第 1 层：先摘要
-#       ModelCallLimitMiddleware(thread_limit=5),        # 第 2 层：再限流
-#       ToolRetryMiddleware(max_retries=2),              # 第 3 层：最后重试
+#       SummarizationMiddleware(model=model),   # 第 1 层：先摘要
+#       ModelCallLimitMiddleware(thread_limit=5),  # 第 2 层：再限流
+#       ToolRetryMiddleware(max_retries=2),        # 第 3 层：最后重试
 #   ])
 print("""
     请求进来

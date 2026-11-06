@@ -2949,6 +2949,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "langchain" },
+    { name = "langchain-openai" },
     { name = "openai" },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -2961,7 +2962,6 @@ fastapi = [
 ]
 langchain = [
     { name = "langchain" },
-    { name = "langchain-openai" },
     { name = "langgraph" },
 ]
 rag = [
@@ -2976,7 +2976,7 @@ requires-dist = [
     { name = "fastapi", marker = "extra == 'fastapi'", specifier = ">=0.110" },
     { name = "langchain", specifier = ">=1.4.8" },
     { name = "langchain", marker = "extra == 'langchain'", specifier = ">=0.2" },
-    { name = "langchain-openai", marker = "extra == 'langchain'", specifier = ">=0.1" },
+    { name = "langchain-openai", specifier = ">=1.7" },
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.1" },
     { name = "openai", specifier = ">=1.30" },
     { name = "pydantic", specifier = ">=2.14.2" },

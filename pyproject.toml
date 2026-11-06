@@ -11,13 +11,13 @@ dependencies = [
     "python-dotenv>=1.0",
     "openai>=1.30",
     "langchain>=1.4.8",
+    "langchain-openai>=1.7",
     "pydantic>=2.14.2",
 ]
 
 [project.optional-dependencies]
 langchain = [
     "langchain>=0.2",
-    "langchain-openai>=0.1",
     "langgraph>=0.1",
 ]
 fastapi = [
