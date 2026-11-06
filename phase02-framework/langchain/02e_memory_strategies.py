@@ -1,5 +1,5 @@
 """
-手写 Memory 三策略（Day 2a）
+手写 Memory 三策略（02e）
 ============================================================
 学习目标：
 1. 不调框架，手写实现三种记忆策略：
@@ -13,7 +13,7 @@
 本文件抽象出统一的 Memory 接口，对比三种策略如何控制上下文长度。
 
 运行：
-    python 03_memory_strategies.py
+    python 02e_memory_strategies.py
 """
 
 from typing import List, Dict

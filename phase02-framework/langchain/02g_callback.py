@@ -1,5 +1,5 @@
 """
-Callback 调试（Day 2b）
+Callback 调试（02g）
 ============================================================
 学习目标：
 1. 用 Callback 钩子替代 mini-agent/agent.py 里的 print 调试
@@ -18,7 +18,7 @@ Callback 思路：把「观察行为」从「业务逻辑」里剥离出来，
 不依赖真实 LLM 调用即可运行（纯教学，展示钩子触发机制）。
 
 运行：
-    python 04_callback.py
+    python 02g_callback.py
 """
 
 from typing import Any, List

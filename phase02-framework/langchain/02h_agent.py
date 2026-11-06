@@ -1,18 +1,18 @@
 """
-从零写一个完整带工具调用的 Agent（Day 3 · 达标验收）
+从零写一个完整带工具调用的 Agent（02h · 达标验收）
 ============================================================
 验收标准：
 1. 带 ≥2 个工具（本文件提供 3 个：天气 / 计算器 / 时间）
-2. 带记忆（Window 滑动窗口，复用 Day 2 思路）
-3. 带 Callback（复用 Day 2 思路，替代 print）
+2. 带记忆（Window 滑动窗口，复用 02e 思路）
+3. 带 Callback（复用 02g 思路，替代 print）
 4. 能独立跑通多轮对话 + 多工具协作
 
-本文件综合 Day 1（@tool + StructuredTool）+ Day 2（Memory + Callback），
+本文件综合 02a/02b（@tool + StructuredTool）+ 02e/02g（Memory + Callback），
 用 LangChain 真实组件组装，但核心循环逻辑保持 mini-agent 的手写风格，
 让你看清框架「帮你做了什么、你还需要自己做什么」。
 
 运行：
-    python 05_agent.py
+    python 02h_agent.py
 """
 
 import os
@@ -43,7 +43,7 @@ client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
 
 # ============================================================
-# 2. 定义工具（Day 1 知识：@tool 快速定义 + StructuredTool 强校验）
+# 2. 定义工具（02a/02b 知识：@tool 快速定义 + StructuredTool 强校验）
 # ============================================================
 
 def get_weather(city: str) -> str:
@@ -71,7 +71,7 @@ def get_current_time() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-# 用 StructuredTool 组装（演示 Day 1 的两种定义方式混用）
+# 用 StructuredTool 组装（演示 02a/02b 的两种定义方式混用）
 tools = [
     StructuredTool.from_function(
         func=get_weather,
@@ -105,7 +105,7 @@ for t in tools:
 
 
 # ============================================================
-# 3. 记忆（Day 2 知识：Window 滑动窗口）
+# 3. 记忆（02e 知识：Window 滑动窗口）
 # ============================================================
 
 class WindowMemory:
@@ -124,7 +124,7 @@ class WindowMemory:
 
 
 # ============================================================
-# 4. Callback（Day 2 知识：替代 print）
+# 4. Callback（02g 知识：替代 print）
 # ============================================================
 
 class AgentCallback:
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     callback = AgentCallback()
 
     print("=" * 60)
-    print("Day 3 验收：多轮对话 + 多工具协作")
+    print("02h 验收：多轮对话 + 多工具协作")
     print("=" * 60)
 
     # 第 1 轮：单工具（天气）

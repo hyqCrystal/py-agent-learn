@@ -1,5 +1,5 @@
 """
-StructuredTool + Pydantic（Day 1b）
+StructuredTool + Pydantic（02b）
 ============================================================
 学习目标：
 1. 用 Pydantic BaseModel 定义工具参数 Schema
@@ -12,7 +12,7 @@ StructuredTool + Pydantic（Day 1b）
     StructuredTool -> 参数 schema 靠「Pydantic」显式声明，调用前先校验
 
 运行：
-    python 02_structured_tool.py
+    python 02b_structured_tool.py
 """
 
 from pydantic import BaseModel, Field, ValidationError

@@ -1,5 +1,5 @@
 """
-LangChain Tools 基础（Day 1a）：@tool 装饰器
+LangChain Tools 基础（02a）：@tool 装饰器
 ============================================================
 学习目标：
 1. 用 @tool 将普通 Python 函数一键转换为 Tool
@@ -19,7 +19,7 @@ LangChain Tools 基础（Day 1a）：@tool 装饰器
 本文件展示：@tool 如何自动生成这段 schema，省去手写。
 
 运行：
-    python 01_tool_decorator.py
+    python 02a_tool_decorator.py
 """
 
 from langchain_core.tools import tool
@@ -100,4 +100,4 @@ if __name__ == "__main__":
         print("结论：@tool 也能拦截基础类型错误（底层同为 Pydantic 解析）")
     print()
     print("=> @tool 与 StructuredTool 的真正差异不在「有没有校验」，")
-    print("   而在「校验规则能否自定义」，请看 02_structured_tool.py")
+    print("   而在「校验规则能否自定义」，请看 02b_structured_tool.py")
