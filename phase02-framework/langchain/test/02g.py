@@ -11,7 +11,7 @@ class CallbackHandler:
     def on_tool_start(self, tool_name: str, args: dict) -> None:
         """Tool 调用前触发。"""
 
-    def on_tool_end(self, response: Any) -> None:
+    def on_tool_end(self, tool_name: str, result: Any) -> None:
         """Tool 调用后触发。"""
 
 
@@ -21,17 +21,19 @@ class DebugCallback(CallbackHandler):
         self.llm_calls = 0
         self.tool_calls = 0
 
-    def on_llm_start(self, prompt: Any)->None:
+    def on_llm_start(self, prompt: Any) -> None:
+        self.llm_calls += 1
         print(f"[LLM  开始] 第 {self.llm_calls} 次调用模型")
 
     def on_llm_end(self, response: Any) -> None:
         print(f"[LLM  结束] 返回内容：{str(response)[:30]}")
 
     def on_tool_start(self, tool_name: str, args: dict) -> None:
-        print(f"[Tool 开始] 第 {self.tool_calls} 次调用工具")
+        self.tool_calls += 1
+        print(f"[Tool 开始] {tool_name}({args})")
 
-    def on_tool_end(self, response: Any) -> None:
-        print(f"[Tool 结束] 返回内容：{str(response)[:30]}")
+    def on_tool_end(self, tool_name: str, result: Any) -> None:
+        print(f"[Tool 结束] {tool_name} -> {str(result)[:30]}")
 
 class CostCallback(CallbackHandler):
 
@@ -49,9 +51,9 @@ class CostCallback(CallbackHandler):
 
 def run_agent_with_callback(question: str, callbacks: List[CallbackHandler])->None:
 
-    def _emit(method:str,*agrs):
+    def _emit(method: str, *args):
         for callback in callbacks:
-            getattr(callback, method)( *agrs)
+            getattr(callback, method)(*args)
 
 
     # 模拟一轮：LLM -> 决定调工具 -> 执行工具 -> LLM 再总结
